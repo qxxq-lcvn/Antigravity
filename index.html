@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Study Timetable Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      :root {
+        --sky-1: #bfe3fc;
+        --sky-2: #e2f2fe;
+        --paper: #f8fbff;
+        --paper-2: #edf6ff;
+        --ink: #2a3f57;
+        --muted: #5a6f85;
+        --accent: #70caf9;
+        --accent-strong: #47b5f3;
+        --emerald: #7ec8af;
+        --danger: #dc8a8a;
+        --shadow: rgba(81, 128, 164, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 100%);
+        color: var(--ink);
+      }
+
+      body {
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .planner-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.36);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 10px 35px var(--shadow);
+        backdrop-filter: blur(4px);
+      }
+
+      .title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .title-badge {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent), #d9f2ff);
+        color: #174a6d;
+        font-size: 1.25rem;
+        box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.55);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: 'Fredoka', sans-serif;
+        font-size: clamp(2rem, 2.5vw, 2.7rem);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar .date-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(106, 164, 206, 0.35);
+        border-radius: 16px;
+        padding: 8px 12px;
+      }
+
+      input[type="date"] {
+        font-family: 'Inter', sans-serif;
+        background: transparent;
+        border: none;
+        color: var(--ink);
+        font-weight: 600;
+        outline: none;
+      }
+
+      .planner-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--ink);
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 6px 18px rgba(70, 141, 188, 0.12);
+      }
+
+      .planner-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, #7dcfe9, #b9e5ff);
+      }
+
+      .danger-btn {
+        background: rgba(220, 138, 138, 0.12);
+        color: #8d4b4b;
+      }
+
+      .progress-banner {
+        margin-top: 22px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.48);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 35px rgba(96, 144, 185, 0.09);
+      }
+
+      .progress-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 12px;
+        font-weight: 700;
+      }
+
+      .progress-label {
+        font-size: 1rem;
+      }
+
+      .progress-pill {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(117, 202, 168, 0.12);
+        color: #176d54;
+      }
+
+      .progress-bar {
+        position: relative;
+        width: 100%;
+        height: 18px;
+        background: rgba(116, 167, 214, 0.15);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-bar > span {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #5fc9b3, #8bd7c6, #b6ebd8);
+        transition: width 0.25s ease;
+      }
+
+      .planner-grid {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 22px;
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.42);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 26px;
+        box-shadow: 0 10px 35px rgba(96, 144, 185, 0.09);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 18px 18px 10px;
+      }
+
+      .panel-header h2 {
+        margin: 0;
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.45rem;
+      }
+
+      .tiny-btn {
+        border: none;
+        border-radius: 10px;
+        background: rgba(112, 202, 249, 0.14);
+        color: var(--ink);
+        padding: 8px 10px;
+      }
+
+      .schedule-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 0 16px 20px;
+      }
+
+      .task-row {
+        display: grid;
+        grid-template-columns: 110px 1fr auto auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 16px;
+        background: rgba(240, 248, 255, 0.7);
+        border: 1px solid rgba(126, 177, 221, 0.2);
+      }
+
+      .task-row input {
+        width: 100%;
+        border: 1px solid transparent;
+        background: transparent;
+        border-radius: 10px;
+        padding: 8px 10px;
+        color: var(--ink);
+        outline: none;
+      }
+
+      .task-row input:focus {
+        border-color: rgba(112, 202, 249, 0.45);
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .task-row.completed .task-text {
+        text-decoration: line-through;
+        color: rgba(42, 63, 87, 0.6);
+      }
+
+      .task-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .check-btn,
+      .delete-btn {
+        border: none;
+        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .check-btn {
+        background: rgba(126, 200, 175, 0.16);
+        color: #1d6b54;
+      }
+
+      .delete-btn {
+        background: rgba(220, 138, 138, 0.1);
+        color: #985858;
+      }
+
+      .goal-card {
+        padding-bottom: 16px;
+      }
+
+      .goal-controls {
+        display: flex;
+        gap: 8px;
+        padding: 0 16px 14px;
+      }
+
+      .goal-controls input {
+        flex: 1;
+        border: 1px solid rgba(126, 177, 221, 0.28);
+        background: rgba(255, 255, 255, 0.58);
+        border-radius: 12px;
+        padding: 10px 12px;
+        outline: none;
+        color: var(--ink);
+      }
+
+      .goal-list {
+        list-style: none;
+        margin: 0;
+        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .goal-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px 12px;
+        border-bottom: 2px dotted rgba(111, 168, 213, 0.45);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px 12px 0 0;
+      }
+
+      .goal-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--emerald);
+      }
+
+      .goal-item span {
+        flex: 1;
+        word-break: break-word;
+      }
+
+      .goal-item.done span {
+        text-decoration: line-through;
+        color: rgba(42, 63, 87, 0.55);
+      }
+
+      .goal-action {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font-size: 1.15rem;
+      }
+
+      .summary-card {
+        position: relative;
+        margin-top: 22px;
+        border-radius: 30px;
+        background: linear-gradient(180deg, rgba(247, 250, 253, 0.95), rgba(233, 245, 255, 0.8));
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 14px 34px rgba(96, 144, 185, 0.09);
+        overflow: hidden;
+      }
+
+      .spiral-top {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        padding: 16px 0 12px;
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .spiral-ring {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid rgba(72, 124, 180, 0.42);
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      }
+
+      .summary-content {
+        padding: 0 20px 22px;
+      }
+
+      .mood-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 8px 0 14px;
+        flex-wrap: wrap;
+      }
+
+      .mood-btn {
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 14px;
+        width: 52px;
+        height: 52px;
+        font-size: 1.7rem;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      }
+
+      .mood-btn.active {
+        background: rgba(255, 255, 255, 0.75);
+        border-color: rgba(88, 165, 221, 0.48);
+        transform: scale(1.1);
+      }
+
+      .summary-notes {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        border: none;
+        background: transparent;
+        padding: 14px 16px 18px;
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--ink);
+        border-radius: 14px;
+        outline: none;
+        background-image: linear-gradient(to bottom, transparent 0%, transparent calc(100% - 1px), rgba(126, 177, 221, 0.2) calc(100% - 1px));
+        background-size: 100% 31px;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .summary-notes::placeholder {
+        color: rgba(42, 63, 87, 0.6);
+      }
+
+      .toast-container {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 4000;
+      }
+
+      .toast {
+        min-width: 220px;
+        max-width: 320px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: rgba(22, 52, 76, 0.88);
+        color: #f5fbff;
+        box-shadow: 0 12px 26px rgba(20, 44, 64, 0.22);
+        opacity: 0;
+        transform: translateY(12px);
+        animation: showToast 2.8s ease forwards;
+      }
+
+      @keyframes showToast {
+        0% { opacity: 0; transform: translateY(12px); }
+        12% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-8px); }
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 29, 41, 0.30);
+        backdrop-filter: blur(3px);
+        z-index: 3000;
+      }
+
+      .modal.hidden {
+        display: none;
+      }
+
+      .modal-card {
+        width: min(420px, calc(100vw - 40px));
+        background: rgba(245, 250, 255, 0.96);
+        border-radius: 24px;
+        padding: 20px 18px 18px;
+        box-shadow: 0 22px 40px rgba(18, 42, 61, 0.18);
+        border: 1px solid rgba(124, 179, 220, 0.25);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-family: 'Fredoka', sans-serif;
+        font-size: 1.7rem;
+      }
+
+      .mode-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .mode-btn {
+        border: 1px solid rgba(124, 179, 220, 0.25);
+        background: rgba(255, 255, 255, 0.55);
+        padding: 10px 8px;
+        border-radius: 12px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .mode-btn.active {
+        background: linear-gradient(135deg, #c9efff, #eafcff);
+        border-color: rgba(83, 165, 224, 0.4);
+      }
+
+      .timer-display {
+        text-align: center;
+        font-weight: 800;
+        font-size: clamp(2.3rem, 4vw, 3.6rem);
+        letter-spacing: 0.06em;
+        color: var(--ink);
+        font-family: 'Fredoka', sans-serif;
+        margin-bottom: 16px;
+      }
+
+      .modal-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .timer-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(103, 191, 242, 0.1);
+        color: #1d5d8b;
+        font-weight: 700;
+        margin-right: auto;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 900px) {
+        .planner-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 14px;
+        }
+
+        .page-header {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .toolbar {
+          justify-content: space-between;
+        }
+
+        .task-row {
+          grid-template-columns: 88px 1fr 36px 36px;
+        }
+
+        .task-row .time-input {
+          width: 100%;
+        }
+      }
+
+      @media print {
+        body {
+          background: white;
+          padding: 0;
+        }
+
+        .page-header .toolbar > button,
+        .goal-controls,
+        .summary-card .mood-row,
+        .summary-card .spiral-top,
+        .modal,
+        .toast-container,
+        .progress-banner > .progress-head,
+        .progress-banner > .progress-bar {
+          display: none !important;
+        }
+
+        .planner-shell {
+          max-width: 100%;
+        }
+
+        .panel,
+        .summary-card,
+        .page-header {
+          box-shadow: none !important;
+          background: white !important;
+          border: 1px solid rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .planner-grid {
+          grid-template-columns: 1.4fr 1fr;
+        }
+      }
+
+      *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      *::-webkit-scrollbar-track {
+        background: rgba(156, 188, 213, 0.12);
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background: rgba(82, 124, 174, 0.38);
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="planner-shell">
+      <header class="page-header">
+        <div class="title-wrap">
+          <div class="title-badge"><i class="fa-solid fa-calendar-check"></i></div>
+          <h1>Study Timetable Planner</h1>
+        </div>
+
+        <div class="toolbar">
+          <label class="date-wrap" for="date-input">
+            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+            <input id="date-input" type="date" aria-label="Choose a date" />
+          </label>
+          <button id="preset-btn" class="planner-btn primary-btn" type="button">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Preset
+          </button>
+          <button id="reset-btn" class="planner-btn danger-btn" type="button">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+          <button id="print-btn" class="planner-btn" type="button">
+            <i class="fa-solid fa-print"></i> Print
+          </button>
+          <button id="audio-toggle" class="planner-btn" type="button" aria-pressed="false">
+            <i class="fa-solid fa-waves"></i> Focus Audio: Off
+          </button>
+          <button id="pomodoro-btn" class="planner-btn primary-btn" type="button">
+            <i class="fa-solid fa-clock"></i> Pomodoro
+          </button>
+        </div>
+      </header>
+
+      <section class="progress-banner" aria-label="Daily completion progress">
+        <div class="progress-head">
+          <span class="progress-label">Today's progress</span>
+          <span id="progress-pill" class="progress-pill">0% complete</span>
+        </div>
+        <div class="progress-bar" aria-hidden="true">
+          <span id="progress-fill"></span>
+        </div>
+      </section>
+
+      <main class="planner-grid">
+        <section class="panel" aria-labelledby="daily-schedule-heading">
+          <div class="panel-header">
+            <h2 id="daily-schedule-heading">Daily Schedule</h2>
+            <button id="add-slot-btn" class="tiny-btn" type="button">
+              <i class="fa-solid fa-plus"></i> Add Slot
+            </button>
+          </div>
+          <div id="schedule-list" class="schedule-list"></div>
+        </section>
+
+        <aside class="panel goal-card" aria-labelledby="focus-heading">
+          <div class="panel-header">
+            <h2 id="focus-heading">Monthly Focus</h2>
+          </div>
+          <div class="goal-controls">
+            <label class="sr-only" for="goal-input">Add a monthly goal</label>
+            <input id="goal-input" type="text" placeholder="Add a goal..." />
+            <button id="add-goal-btn" class="planner-btn primary-btn" type="button">Add</button>
+          </div>
+          <ul id="goal-list" class="goal-list"></ul>
+        </aside>
+      </main>
+
+      <section class="summary-card" aria-labelledby="today-summary-heading">
+        <div class="spiral-top" aria-hidden="true">
+          <span class="spiral-ring"></span>
+          <span class="spiral-ring"></span>
+          <span class="spiral-ring"></span>
+          <span class="spiral-ring"></span>
+          <span class="spiral-ring"></span>
+        </div>
+
+        <div class="summary-content">
+          <div class="panel-header" style="padding-left: 0; padding-right: 0;">
+            <h2 id="today-summary-heading">Today Summary</h2>
+          </div>
+
+          <div class="mood-row" aria-label="Mood rating">
+            <button class="mood-btn" data-mood="😍" type="button" aria-label="Loved it">😍</button>
+            <button class="mood-btn" data-mood="😊" type="button" aria-label="Happy">😊</button>
+            <button class="mood-btn" data-mood="😐" type="button" aria-label="Okay">😐</button>
+            <button class="mood-btn" data-mood="🥱" type="button" aria-label="Sleepy">🥱</button>
+            <button class="mood-btn" data-mood="😫" type="button" aria-label="Exhausted">😫</button>
+          </div>
+
+          <label class="sr-only" for="summary-notes">Daily reflection and notes</label>
+          <textarea id="summary-notes" class="summary-notes" placeholder="Write your study wins, notes, and reflection for today..."></textarea>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="pomodoro-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pomodoro-title">
+        <div class="modal-header">
+          <h3 id="pomodoro-title">Pomodoro</h3>
+          <button id="close-pomodoro" class="planner-btn" type="button">Close</button>
+        </div>
+
+        <div class="timer-pill" id="mode-pill">Focus</div>
+        <div class="mode-row">
+          <button class="mode-btn active" data-mode="focus" type="button">Focus</button>
+          <button class="mode-btn" data-mode="shortBreak" type="button">Short</button>
+          <button class="mode-btn" data-mode="longBreak" type="button">Long</button>
+        </div>
+
+        <div id="timer-display" class="timer-display">25:00</div>
+
+        <div class="modal-actions">
+          <button id="timer-start" class="planner-btn primary-btn" type="button">Start</button>
+          <button id="timer-pause" class="planner-btn" type="button">Pause</button>
+          <button id="timer-reset" class="planner-btn danger-btn" type="button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_PREFIX = 'study_timetable_';
+      const MOODS = ['😍', '😊', '😐', '🥱', '😫'];
+      const DEFAULT_START_HOUR = 8;
+      const DEFAULT_END_HOUR = 18;
+
+      const state = {
+        date: new Date().toISOString().slice(0, 10),
+        tasks: [],
+        goals: [],
+        summary: '',
+        mood: ''
+      };
+
+      const dateInput = document.getElementById('date-input');
+      const scheduleList = document.getElementById('schedule-list');
+      const goalInput = document.getElementById('goal-input');
+      const goalList = document.getElementById('goal-list');
+      const summaryNotes = document.getElementById('summary-notes');
+      const progressFill = document.getElementById('progress-fill');
+      const progressPill = document.getElementById('progress-pill');
+      const audioToggle = document.getElementById('audio-toggle');
+      const timerDisplay = document.getElementById('timer-display');
+      const modePill = document.getElementById('mode-pill');
+      const pomodoroModal = document.getElementById('pomodoro-modal');
+      const toastContainer = document.getElementById('toast-container');
+
+      let rainAudio = null;
+      let audioCtx = null;
+      let pomodoroTimer = null;
+      let pomodoroMode = 'focus';
+      let pomodoroSeconds = 25 * 60;
+
+      function createDefaultTasks() {
+        const tasks = [];
+        for (let hour = DEFAULT_START_HOUR; hour <= DEFAULT_END_HOUR; hour += 1) {
+          const time = `${String(hour).padStart(2, '0')}:00`;
+          tasks.push({
+            id: `task-${time}`,
+            time,
+            text: '',
+            completed: false
+          });
+        }
+        return tasks;
+      }
+
+      function createDefaultGoals() {
+        return [
+          { id: `goal-${Date.now()}-1`, text: 'Finish chemistry review set', completed: false },
+          { id: `goal-${Date.now()}-2`, text: 'Complete math practice quiz', completed: false }
+        ];
+      }
+
+      function getStorageKey(dateString) {
+        return `${STORAGE_PREFIX}${dateString}`;
+      }
+
+      function loadStateForDate(dateString) {
+        const saved = localStorage.getItem(getStorageKey(dateString));
+        if (!saved) {
+          return {
+            date: dateString,
+            tasks: createDefaultTasks(),
+            goals: createDefaultGoals(),
+            summary: '',
+            mood: ''
+          };
+        }
+
+        try {
+          const parsed = JSON.parse(saved);
+          return {
+            date: dateString,
+            tasks: Array.isArray(parsed.tasks) && parsed.tasks.length ? parsed.tasks : createDefaultTasks(),
+            goals: Array.isArray(parsed.goals) ? parsed.goals : createDefaultGoals(),
+            summary: parsed.summary || '',
+            mood: parsed.mood || ''
+          };
+        } catch (error) {
+          return {
+            date: dateString,
+            tasks: createDefaultTasks(),
+            goals: createDefaultGoals(),
+            summary: '',
+            mood: ''
+          };
+        }
+      }
+
+      function saveState() {
+        const payload = {
+          date: state.date,
+          tasks: state.tasks,
+          goals: state.goals,
+          summary: state.summary,
+          mood: state.mood
+        };
+        localStorage.setItem(getStorageKey(state.date), JSON.stringify(payload));
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+      }
+
+      function renderProgress() {
+        const total = state.tasks.length;
+        const completed = state.tasks.filter(task => task.completed).length;
+        const percent = total ? Math.round((completed / total) * 100) : 0;
+        progressFill.style.width = `${percent}%`;
+        progressPill.textContent = `${percent}% complete`;
+      }
+
+      function renderSchedule() {
+        scheduleList.innerHTML = state.tasks.map((task, index) => {
+          const rowClass = task.completed ? 'task-row completed' : 'task-row';
+          const checkedClass = task.completed ? 'fa-solid fa-check' : 'fa-regular fa-circle';
+          return `
+            <div class="${rowClass}" data-index="${index}">
+              <input class="time-input" type="time" value="${task.time}" aria-label="Task time" data-index="${index}" data-field="time" />
+              <input class="task-text" type="text" value="${escapeHtml(task.text)}" aria-label="Task description" data-index="${index}" data-field="text" placeholder="Add study task..." />
+              <div class="task-controls">
+                <button class="check-btn" type="button" data-index="${index}" data-action="toggle" aria-label="Toggle task completion">
+                  <i class="${checkedClass}"></i>
+                </button>
+              </div>
+              <div class="task-controls">
+                <button class="delete-btn" type="button" data-index="${index}" data-action="delete" aria-label="Delete task">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderGoals() {
+        goalList.innerHTML = state.goals.map(goal => `
+          <li class="goal-item ${goal.completed ? 'done' : ''}">
+            <input type="checkbox" data-goal-id="${goal.id}" ${goal.completed ? 'checked' : ''} aria-label="Toggle goal completion" />
+            <span>${escapeHtml(goal.text)}</span>
+            <button class="goal-action" type="button" data-goal-id="${goal.id}" data-action="delete-goal" aria-label="Delete goal">×</button>
+          </li>
+        `).join('');
+      }
+
+      function renderMood() {
+        const moodButtons = document.querySelectorAll('.mood-btn');
+        moodButtons.forEach(button => {
+          const isActive = button.dataset.mood === state.mood;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+      }
+
+      function render() {
+        dateInput.value = state.date;
+        summaryNotes.value = state.summary;
+        renderProgress();
+        renderSchedule();
+        renderGoals();
+        renderMood();
+      }
+
+      function addTaskSlot() {
+        const lastTime = state.tasks.length ? state.tasks[state.tasks.length - 1].time : '08:00';
+        const hour = Number(lastTime.split(':')[0]) + 1;
+        const nextTime = `${String(hour).padStart(2, '0')}:00`;
+        state.tasks.push({
+          id: `task-${Date.now()}`,
+          time: hour > 23 ? '23:00' : nextTime,
+          text: '',
+          completed: false
+        });
+        saveState();
+        render();
+      }
+
+      function updateTask(index, field, value) {
+        if (!state.tasks[index]) return;
+        state.tasks[index][field] = value;
+        saveState();
+        renderProgress();
+      }
+
+      function toggleTask(index) {
+        if (!state.tasks[index]) return;
+        state.tasks[index].completed = !state.tasks[index].completed;
+        saveState();
+        render();
+      }
+
+      function deleteTask(index) {
+        state.tasks.splice(index, 1);
+        saveState();
+        render();
+      }
+
+      function addGoal() {
+        const text = goalInput.value.trim();
+        if (!text) {
+          goalInput.focus();
+          return;
+        }
+
+        state.goals.push({
+          id: `goal-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`,
+          text,
+          completed: false
+        });
+        goalInput.value = '';
+        saveState();
+        renderGoals();
+        showToast('Goal added!');
+      }
+
+      function toggleGoal(goalId) {
+        state.goals = state.goals.map(goal => goal.id === goalId ? { ...goal, completed: !goal.completed } : goal);
+        saveState();
+        renderGoals();
+      }
+
+      function deleteGoal(goalId) {
+        state.goals = state.goals.filter(goal => goal.id !== goalId);
+        saveState();
+        renderGoals();
+      }
+
+      function ensureAudioContext() {
+        if (!audioCtx) {
+          const AudioCtor = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtor) {
+            showToast('This browser does not support audio synthesis.');
+            return null;
+          }
+          audioCtx = new AudioCtor();
+        }
+        return audioCtx;
+      }
+
+      function toggleRainAudio() {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+
+        if (rainAudio) {
+          rainAudio.source.stop();
+          rainAudio.source.disconnect();
+          rainAudio.filter.disconnect();
+          rainAudio.gain.disconnect();
+          rainAudio = null;
+          audioToggle.setAttribute('aria-pressed', 'false');
+          audioToggle.innerHTML = '<i class="fa-solid fa-waves"></i> Focus Audio: Off';
+          return;
+        }
+
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 0.045;
+
+        const filterNode = ctx.createBiquadFilter();
+        filterNode.type = 'lowpass';
+        filterNode.frequency.value = 1800;
+        filterNode.Q.value = 0.4;
+
+        const bufferLength = 2 * ctx.sampleRate;
+        const buffer = ctx.createBuffer(1, bufferLength, ctx.sampleRate);
+        const channelData = buffer.getChannelData(0);
+        let lastOut = 0;
+
+        for (let i = 0; i < bufferLength; i += 1) {
+          const white = Math.random() * 2 - 1;
+          lastOut = (0.02 * white) + (0.98 * lastOut);
+          channelData[i] = lastOut * 0.4;
+        }
+
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+
+        source.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        source.start();
+
+        rainAudio = { source, filter: filterNode, gain: gainNode };
+        audioToggle.setAttribute('aria-pressed', 'true');
+        audioToggle.innerHTML = '<i class="fa-solid fa-volume-high"></i> Focus Audio: On';
+      }
+
+      function playChime() {
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const oscillatorA = ctx.createOscillator();
+        const oscillatorB = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillatorA.type = 'sine';
+        oscillatorA.frequency.setValueAtTime(660, now);
+        oscillatorB.type = 'triangle';
+        oscillatorB.frequency.setValueAtTime(880, now + 0.08);
+
+        gainNode.gain.setValueAtTime(0.0001, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.12, now + 0.03);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+
+        oscillatorA.connect(gainNode);
+        oscillatorB.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillatorA.start(now);
+        oscillatorB.start(now + 0.08);
+        oscillatorA.stop(now + 0.7);
+        oscillatorB.stop(now + 0.8);
+      }
+
+      function formatTime(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      function setPomodoroMode(mode) {
+        pomodoroMode = mode;
+        const modeMap = {
+          focus: { label: 'Focus', seconds: 25 * 60 },
+          shortBreak: { label: 'Short Break', seconds: 5 * 60 },
+          longBreak: { label: 'Long Break', seconds: 15 * 60 }
+        };
+
+        const next = modeMap[mode] || modeMap.focus;
+        pomodoroSeconds = next.seconds;
+        modePill.textContent = next.label;
+        timerDisplay.textContent = formatTime(pomodoroSeconds);
+
+        document.querySelectorAll('.mode-btn').forEach(button => {
+          const active = button.dataset.mode === mode;
+          button.classList.toggle('active', active);
+        });
+      }
+
+      function startPomodoro() {
+        clearInterval(pomodoroTimer);
+        pomodoroTimer = setInterval(() => {
+          if (pomodoroSeconds > 0) {
+            pomodoroSeconds -= 1;
+            timerDisplay.textContent = formatTime(pomodoroSeconds);
+            return;
+          }
+
+          clearInterval(pomodoroTimer);
+          playChime();
+          showToast(`${document.querySelector('.mode-btn.active')?.textContent || 'Session'} complete!`);
+          setPomodoroMode(pomodoroMode === 'focus' ? 'shortBreak' : 'focus');
+        }, 1000);
+      }
+
+      function pausePomodoro() {
+        clearInterval(pomodoroTimer);
+      }
+
+      function resetPomodoro() {
+        clearInterval(pomodoroTimer);
+        setPomodoroMode(pomodoroMode);
+      }
+
+      function setDate(dateValue) {
+        state.date = dateValue;
+        const nextState = loadStateForDate(dateValue);
+        Object.assign(state, nextState);
+        saveState();
+        render();
+      }
+
+      function applyPreset() {
+        const presetState = {
+          date: state.date,
+          tasks: [
+            { id: 'preset-1', time: '08:00', text: 'Review lecture notes', completed: true },
+            { id: 'preset-2', time: '09:00', text: 'Math revision and practice questions', completed: false },
+            { id: 'preset-3', time: '10:00', text: 'Chemistry flashcards review', completed: false },
+            { id: 'preset-4', time: '11:00', text: 'Essay planning and outline', completed: true },
+            { id: 'preset-5', time: '12:00', text: 'Lunch and reset break', completed: false },
+            { id: 'preset-6', time: '13:00', text: 'Biology chapter recap', completed: false },
+            { id: 'preset-7', time: '14:00', text: 'Practice quiz with timed review', completed: false },
+            { id: 'preset-8', time: '15:00', text: 'Read literature summary', completed: false },
+            { id: 'preset-9', time: '16:00', text: 'Create revision sheet', completed: false },
+            { id: 'preset-10', time: '17:00', text: 'Quick recap and next-day planning', completed: false },
+            { id: 'preset-11', time: '18:00', text: 'Wrap up and journal notes', completed: false }
+          ],
+          goals: [
+            { id: 'preset-goal-1', text: 'Finish unit review checklist', completed: false },
+            { id: 'preset-goal-2', text: 'Complete 2 timed practice questions', completed: true },
+            { id: 'preset-goal-3', text: 'Prepare summary cards for tomorrow', completed: false }
+          ],
+          summary: 'Today went well overall. The math practice section was challenging but manageable. I should spend extra time on chemistry terminology before the next quiz.',
+          mood: '😊'
+        };
+
+        Object.assign(state, presetState);
+        saveState();
+        render();
+        showToast('Preset schedule loaded.');
+      }
+
+      function resetPlanner() {
+        const confirmed = window.confirm('Reset all entries for this date?');
+        if (!confirmed) return;
+
+        const freshState = {
+          date: state.date,
+          tasks: createDefaultTasks(),
+          goals: createDefaultGoals(),
+          summary: '',
+          mood: ''
+        };
+
+        Object.assign(state, freshState);
+        saveState();
+        render();
+        showToast('Planner reset for this date.');
+      }
+
+      dateInput.addEventListener('change', (event) => setDate(event.target.value));
+      document.getElementById('add-slot-btn').addEventListener('click', addTaskSlot);
+      document.getElementById('add-goal-btn').addEventListener('click', addGoal);
+      goalInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') addGoal();
+      });
+
+      scheduleList.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        const index = Number(target.dataset.index);
+        const field = target.dataset.field;
+        if (field === 'time') updateTask(index, 'time', target.value);
+        if (field === 'text') {
+          updateTask(index, 'text', target.value);
+        }
+      });
+
+      scheduleList.addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const index = Number(button.dataset.index);
+        const action = button.dataset.action;
+        if (action === 'toggle') toggleTask(index);
+        if (action === 'delete') deleteTask(index);
+      });
+
+      goalList.addEventListener('change', (event) => {
+        const checkbox = event.target;
+        if (!(checkbox instanceof HTMLInputElement)) return;
+        if (checkbox.dataset.goalId) toggleGoal(checkbox.dataset.goalId);
+      });
+
+      goalList.addEventListener('click', (event) => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        const goalId = button.dataset.goalId;
+        if (button.dataset.action === 'delete-goal') deleteGoal(goalId);
+      });
+
+      summaryNotes.addEventListener('input', (event) => {
+        state.summary = event.target.value;
+        saveState();
+      });
+
+      document.querySelectorAll('.mood-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          state.mood = button.dataset.mood;
+          saveState();
+          renderMood();
+          showToast(`Mood recorded: ${state.mood}`);
+        });
+      });
+
+      audioToggle.addEventListener('click', toggleRainAudio);
+      document.getElementById('preset-btn').addEventListener('click', applyPreset);
+      document.getElementById('reset-btn').addEventListener('click', resetPlanner);
+      document.getElementById('print-btn').addEventListener('click', () => window.print());
+      document.getElementById('pomodoro-btn').addEventListener('click', () => {
+        pomodoroModal.classList.remove('hidden');
+        pomodoroModal.setAttribute('aria-hidden', 'false');
+      });
+      document.getElementById('close-pomodoro').addEventListener('click', () => {
+        pomodoroModal.classList.add('hidden');
+        pomodoroModal.setAttribute('aria-hidden', 'true');
+      });
+      document.getElementById('timer-start').addEventListener('click', startPomodoro);
+      document.getElementById('timer-pause').addEventListener('click', pausePomodoro);
+      document.getElementById('timer-reset').addEventListener('click', resetPomodoro);
+
+      document.querySelectorAll('.mode-btn').forEach(button => {
+        button.addEventListener('click', () => setPomodoroMode(button.dataset.mode));
+      });
+
+      function initialize() {
+        const today = new Date().toISOString().slice(0, 10);
+        dateInput.value = today;
+        state.date = today;
+        const stored = loadStateForDate(today);
+        Object.assign(state, stored);
+        setPomodoroMode('focus');
+        render();
+      }
+
+      initialize();
+    </script>
+  </body>
+</html>
